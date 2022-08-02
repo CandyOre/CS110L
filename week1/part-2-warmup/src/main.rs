@@ -1,11 +1,13 @@
 /* The following exercises were borrowed from Will Crichton's CS 242 Rust lab. */
 
+#[allow(unused_imports)]
 use std::collections::HashSet;
 
 fn main() {
     println!("Hi! Try running \"cargo test\" to run tests.");
 }
 
+#[cfg(test)]
 fn add_n(v: Vec<i32>, n: i32) -> Vec<i32> {
     let mut new_v: Vec<i32> = Vec::new();
     for e in v.iter() {
@@ -14,12 +16,14 @@ fn add_n(v: Vec<i32>, n: i32) -> Vec<i32> {
     new_v
 }
 
+#[cfg(test)]
 fn add_n_inplace(v: &mut Vec<i32>, n: i32) {
     for e in v.iter_mut() {
         *e += n;
     }
 }
 
+#[cfg(test)]
 fn dedup(v: &mut Vec<i32>) {
     let mut set: HashSet<i32> = HashSet::new();
     let mut v_new: Vec<i32> = Vec::new();
