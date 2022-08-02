@@ -16,6 +16,10 @@ Most resources of this course are incomplete. I'll mainly focus on the Spring 20
 
 - [Bilibili Course Video(fragmentary)](https://www.bilibili.com/video/BV1Ra411A7kN)
 
+Relative course:
+
+- [CS242 Programming Language(Newest)](https://web.stanford.edu/class/cs242/) or [Fall 2019](https://stanford-cs242.github.io/f19/)
+
 # Progress
 
 I have learned the basics of Rust with [Too Many Linked List](https://rust-unofficial.github.io/too-many-lists/). In this course, I want to achieve two goals.
@@ -24,3 +28,8 @@ I have learned the basics of Rust with [Too Many Linked List](https://rust-unoff
 2. Focus on concurrency in the latter part of the course.
 
 To achieve these goals, I hope to complete the course in 1 week.
+
+|Date   |Lecture    |Excercise  |Project    |Time   |
+|:-:    |:-:        |:-:        |:-:        |:-:    |
+|0801   |01-02      |           |           |1.5h   |
+|0802   |03-04      |01-02      |           |1.5h   |
