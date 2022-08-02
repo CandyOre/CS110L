@@ -14,7 +14,10 @@ Most resources of this course are incomplete. I'll mainly focus on the Spring 20
 
 - [[Spring 2020] Starter Code](https://github.com/reberhardt7/cs110l-spr-2020-starter-code)
 
-- [Bilibili Course Video(fragmentary)](https://www.bilibili.com/video/BV1Ra411A7kN)
+Other unofficial resources:
+
+- [[Spring 2020] Bilibili Course Video(fragmentary)](https://www.bilibili.com/video/BV1Ra411A7kN)
+- [[Spring 2020]PKUFlyingPig](https://github.com/PKUFlyingPig/CS110L)
 
 Relative course:
 
