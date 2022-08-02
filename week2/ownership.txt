@@ -9,6 +9,11 @@ fn main() {
     println!("{}", ref3.to_uppercase());
 }
 ```
+This code does not compile.
+Since s is borrowed to ref1 and used in println func,
+it should not be changed in this range.
+
+We can move the assignment of s to the back of println func.
 
 
 
@@ -19,7 +24,12 @@ fn drip_drop() -> &String {
     return &s;
 }
 ```
+This code does not compile.
+The function only borrow s to the caller, but still holds the ownership.
+Therefore, it's not clear when s should be freed.
 
+We can introduce lifetime in the signature of the function:
+    fn drip_drop<'a>() -> &'a String
 
 
 Example 3:
@@ -32,3 +42,9 @@ fn main() {
     println!("{}", s2);
 }
 ```
+This code does not compile.
+The assignment of s2, as String does not implement 'Copy' trait, moves the ownership of v[0],
+but this can't happen because v still holds the ownership of v[0].
+
+We can borrow v[0] to s2 with:
+    let s2: &String = &v[0];
