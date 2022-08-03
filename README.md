@@ -35,4 +35,5 @@ To achieve these goals, I hope to complete the course in 1 week.
 |Date   |Lecture    |Excercise  |Project    |Time   |
 |:-:    |:-:        |:-:        |:-:        |:-:    |
 |0801   |01-02      |           |           |1.5h   |
-|0802   |03-04      |01-02      |           |1.5h   |
+|0802   |03-04      |01-02      |           |4h     |
+|0803   |03-04      |           |           |1.5h   |
