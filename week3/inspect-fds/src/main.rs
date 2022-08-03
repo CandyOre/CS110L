@@ -24,7 +24,7 @@ fn main() {
             std::process::exit(1);
         }
     };
-    println!("Found pid {}", proc.pid);
+    proc.print();
 }
 
 #[cfg(test)]
