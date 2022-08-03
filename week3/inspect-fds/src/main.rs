@@ -4,8 +4,6 @@ mod open_file;
 mod process;
 mod ps_utils;
 
-use crate::ps_utils::get_target;
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
@@ -14,10 +12,11 @@ fn main() {
     }
     let target = &args[1];
 
-    let proc = match get_target(target)
-        .expect("Error occurs when calling ps or pgrep") {
-        Some(pid) => {
-             pid
+    let proc = match ps_utils::get_target(target)
+        .expect("Error occurs when calling ps or pgrep")
+    {
+        Some(proc) => {
+            proc
         },
         None => {
             println!("Target {} did not match running PIDs or executables", target);
@@ -25,6 +24,12 @@ fn main() {
         }
     };
     proc.print();
+
+    for child in ps_utils::get_child_processes(proc.pid)
+        .expect("Error occurs while trying to get child processes")
+    {
+        child.print();
+    }
 }
 
 #[cfg(test)]

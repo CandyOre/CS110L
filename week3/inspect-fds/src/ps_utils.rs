@@ -94,7 +94,6 @@ fn get_process(pid: usize) -> Result<Option<Process>, Error> {
 /// This function takes a pid and returns a list of Process structs for processes that have the
 /// specified pid as their parent process. An Error is returned if ps cannot be executed or
 /// produces unexpected output format.
-#[allow(unused)] // TODO: delete this line for Milestone 5
 pub fn get_child_processes(pid: usize) -> Result<Vec<Process>, Error> {
     let ps_output = Command::new("ps")
         .args(&["--ppid", &pid.to_string(), "-o", "pid= ppid= command="])
