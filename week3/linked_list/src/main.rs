@@ -2,11 +2,11 @@ use linked_list::LinkedList;
 pub mod linked_list;
 
 fn main() {
-    let mut list: LinkedList<u32> = LinkedList::new();
+    let mut list: LinkedList<String> = LinkedList::new();
     assert!(list.is_empty());
     assert_eq!(list.get_size(), 0);
     for i in 1..12 {
-        list.push_front(i);
+        list.push_front(i.to_string() + "w");
     }
     println!("{}", list);
     println!("list size: {}", list.get_size());
