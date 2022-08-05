@@ -11,7 +11,6 @@ Most resources of this course are incomplete. I'll mainly focus on the Spring 20
 - [[Spring 2020] Course Website](https://reberhardt.com/cs110l/spring-2020/)
 - [[Spring 2021] Course Website](https://reberhardt.com/cs110l/spring-2021/)
 - [[Spring 2022] Course Website](https://web.stanford.edu/class/cs110l/)
-
 - [[Spring 2020] Starter Code](https://github.com/reberhardt7/cs110l-spr-2020-starter-code)
 
 Other unofficial resources:
@@ -37,3 +36,4 @@ To achieve these goals, I hope to complete the course in 1 week.
 |0801   |01-02      |           |           |1.5h   |
 |0802   |03-04      |01-02      |           |4h     |
 |0803   |05-06      |03.p1      |           |4h     |
+|0804   |           |03.p2      |           |1h     |
