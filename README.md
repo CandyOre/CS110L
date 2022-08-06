@@ -37,3 +37,4 @@ To achieve these goals, I hope to complete the course in 1 week.
 |0802   |03-04      |01-02      |           |4h     |
 |0803   |05-06      |03.p1      |           |4h     |
 |0804   |           |03.p2      |           |1h     |
+|0805   |07-08      |           |           |1.5h   |
