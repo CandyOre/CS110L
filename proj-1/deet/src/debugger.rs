@@ -69,23 +69,23 @@ impl Debugger {
             match inferior.cont() {
                 Ok(status) => match status {
                     Status::Stopped(sign, ip) => {
-                        println!("Inferior stopped: {} {}", sign, ip);
+                        println!("Subprocess stopped: {} {}", sign, ip);
                     }
                     Status::Exited(code) => {
-                        println!("Inferior exited: {}", code);
+                        println!("Subprocess exited: {}", code);
                         self.running = false;
                     }
                     Status::Signaled(sign) => {
-                        println!("Inferior signaled: {}", sign);
+                        println!("Subprocess exited due to a signal: {}", sign);
                         self.running = false;
                     }
                 }
                 Err(err) => {
-                    println!("Error continuing inferior: {}", err)
+                    println!("Error continuing subprocess: {}", err)
                 }
             }
         } else {
-            println!("No inferior running!");
+            println!("No subprocess running!");
         }
     }
 
@@ -94,11 +94,11 @@ impl Debugger {
             let inferior = self.inferior.as_mut().unwrap();
             match inferior.kill() {
                 Ok(_) => {
-                    println!("Old inferior killed!");
+                    println!("Old subprocess killed!");
                     self.running = false;
                 }
                 Err(err) => {
-                    println!("Error killing inferior: {}", err)
+                    println!("Error killing subprocess: {}", err)
                 }
             }
         }
