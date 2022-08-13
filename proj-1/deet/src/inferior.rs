@@ -8,6 +8,7 @@ use std::os::unix::process::CommandExt;
 use std::process::Child;
 use std::process::Command;
 use std::fmt;
+use regex::Regex;
 
 pub enum Status {
     /// Indicates inferior stopped. Contains the signal that stopped the process, as well as the
@@ -26,7 +27,7 @@ impl fmt::Display for Status {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Status::Stopped(sign, ip) => {
-                write!(f, "Subprocess stopped (signal {}) (inst pointer {})", sign, ip)
+                write!(f, "Subprocess stopped (signal {}) (inst ptr {})", sign, ip)
             }
             Status::Exited(code) => {
                 write!(f, "Subprocess exited (status {})", code)
@@ -106,6 +107,10 @@ impl Inferior {
             let func = data.get_function_from_addr(rip);
             match (&line, &func) {
                 (Some(line), Some(func)) => {
+                    let re = Regex::new(r"(.*deet/)").unwrap();
+                    let line = line.to_string();
+                    let line = re.replace_all(&line, "/deet/").to_string();
+
                     println!("{} ({})", func, line);
                     if func == "main" {
                         break;

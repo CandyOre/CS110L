@@ -14,3 +14,4 @@ gimli = { git = "https://github.com/gimli-rs/gimli", rev = "ad23cdb2", default-f
 object = { version = "0.17", default-features = false, features = ["read"] }
 memmap = "0.7"
 addr2line = "0.11.0"
+regex = "1"
