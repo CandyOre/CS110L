@@ -47,6 +47,7 @@ impl Debugger {
                     }
                 }
                 DebuggerCommand::Quit => {
+                    self.try_kill_inferior();
                     return;
                 }
                 DebuggerCommand::Continue => {
@@ -102,6 +103,7 @@ impl Debugger {
                 }
             }
         }
+        self.inferior = None;
     }
 
     /// This function prompts the user to enter a command, and continues re-prompting until the user
