@@ -1,10 +1,12 @@
 use crate::debugger_command::DebuggerCommand;
-use crate::inferior::{Inferior, Status};
+use crate::inferior::{Inferior, Status as InferiorStatus};
+use crate::dwarf_data::{DwarfData, Error as DwarfError};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 pub struct Debugger {
     target: String,
+    debug_data: DwarfData,
     history_path: String,
     readline: Editor<()>,
     inferior: Option<Inferior>,
@@ -14,8 +16,18 @@ pub struct Debugger {
 impl Debugger {
     /// Initializes the debugger.
     pub fn new(target: &str) -> Debugger {
-        // TODO (milestone 3): initialize the DwarfData
-
+        // Initialize the DwarfData
+        let debug_data = match DwarfData::from_file(target) {
+            Ok(val) => val,
+            Err(DwarfError::ErrorOpeningFile) => {
+                println!("Could not open file {}", target);
+                std::process::exit(1);
+            }
+            Err(DwarfError::DwarfFormatError(err)) => {
+                println!("Could not debugging symbols from {}: {:?}", target, err);
+                std::process::exit(1);
+            }
+        };
         let history_path = format!("{}/.deet_history", std::env::var("HOME").unwrap());
         let mut readline = Editor::<()>::new();
         // Attempt to load history from ~/.deet_history if it exists
@@ -23,6 +35,7 @@ impl Debugger {
 
         Debugger {
             target: target.to_string(),
+            debug_data,
             history_path,
             readline,
             inferior: None,
@@ -74,8 +87,8 @@ impl Debugger {
                 Ok(status) => {
                     println!("{}", status);
                     match status {
-                        Status::Exited(_) |
-                        Status::Signaled(_) => self.running = false,
+                        InferiorStatus::Exited(_) |
+                        InferiorStatus::Signaled(_) => self.running = false,
                         _ => (),
                     }
                 }
@@ -108,7 +121,7 @@ impl Debugger {
     fn print_inferior_backtrace(&self) {
         if self.running {
             let inferior = self.inferior.as_ref().unwrap();
-            match inferior.print_backtrace() {
+            match inferior.print_backtrace(&self.debug_data) {
                 Ok(_) => (),
                 Err(err) => {
                     println!("Error printing backtrace: {}", err);

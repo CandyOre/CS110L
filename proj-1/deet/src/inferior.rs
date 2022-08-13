@@ -1,3 +1,5 @@
+
+use crate::dwarf_data::DwarfData;
 use nix::sys::ptrace;
 use nix::sys::signal;
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
@@ -95,8 +97,9 @@ impl Inferior {
         self.wait(None)
     }
 
-    pub fn print_backtrace(&self) -> Result<(), nix::Error> {
-        println!("Hi backtrace");
+    pub fn print_backtrace(&self, data: &DwarfData) -> Result<(), nix::Error> {
+        let regs = ptrace::getregs(self.pid())?;
+        println!("{:#x}", regs.rip);
         Ok(())
     }
 }
