@@ -99,7 +99,23 @@ impl Inferior {
 
     pub fn print_backtrace(&self, data: &DwarfData) -> Result<(), nix::Error> {
         let regs = ptrace::getregs(self.pid())?;
-        println!("{:#x}", regs.rip);
+        let mut rip = regs.rip as usize;
+        let mut rbp = regs.rbp as usize;
+        loop {
+            let line = data.get_line_from_addr(rip);
+            let func = data.get_function_from_addr(rip);
+            match (&line, &func) {
+                (Some(line), Some(func)) => {
+                    println!("{} ({})", func, line);
+                    if func == "main" {
+                        break;
+                    }
+                }
+                (_, _) => break,
+            }
+            rip = ptrace::read(self.pid(), (rbp + 8) as ptrace::AddressType)? as usize;
+            rbp = ptrace::read(self.pid(), rbp as ptrace::AddressType)? as usize;
+        }
         Ok(())
     }
 }
