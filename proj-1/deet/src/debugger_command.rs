@@ -1,6 +1,8 @@
 pub enum DebuggerCommand {
     Quit,
     Run(Vec<String>),
+    Continue,
+    Kill,
 }
 
 impl DebuggerCommand {
@@ -13,6 +15,8 @@ impl DebuggerCommand {
                     args.iter().map(|s| s.to_string()).collect(),
                 ))
             }
+            "c" | "cont" | "continue" => Some(DebuggerCommand::Continue),
+            "k" | "kill" => Some(DebuggerCommand::Kill),
             // Default case:
             _ => None,
         }

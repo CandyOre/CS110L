@@ -8,6 +8,7 @@ pub struct Debugger {
     history_path: String,
     readline: Editor<()>,
     inferior: Option<Inferior>,
+    running: bool,
 }
 
 impl Debugger {
@@ -25,6 +26,7 @@ impl Debugger {
             history_path,
             readline,
             inferior: None,
+            running: false,
         }
     }
 
@@ -33,8 +35,11 @@ impl Debugger {
             match self.get_next_command() {
                 DebuggerCommand::Run(args) => {
                     if let Some(inferior) = Inferior::new(&self.target, &args) {
+                        // Kill old inferior
+                        self.try_kill_inferior();
                         // Create the inferior
                         self.inferior = Some(inferior);
+                        self.running = true;
                         // Run the inferior
                         self.cont_inferior();
                     } else {
@@ -44,26 +49,57 @@ impl Debugger {
                 DebuggerCommand::Quit => {
                     return;
                 }
+                DebuggerCommand::Continue => {
+                    self.cont_inferior();
+                }
+                DebuggerCommand::Kill => {
+                    if self.running {
+                        self.try_kill_inferior();
+                    } else {
+                        println!("No subprocess running");
+                    }
+                }
             }
         }
     }
 
     fn cont_inferior(&mut self) {
-        let inferior = self.inferior.as_mut().unwrap();
-        match inferior.cont() {
-            Ok(status) => match status {
-                Status::Stopped(sign, ip) => {
-                    println!("Inferior stopped: {} {}", sign, ip);
+        if self.running {
+            let inferior = self.inferior.as_mut().unwrap();
+            match inferior.cont() {
+                Ok(status) => match status {
+                    Status::Stopped(sign, ip) => {
+                        println!("Inferior stopped: {} {}", sign, ip);
+                    }
+                    Status::Exited(code) => {
+                        println!("Inferior exited: {}", code);
+                        self.running = false;
+                    }
+                    Status::Signaled(sign) => {
+                        println!("Inferior signaled: {}", sign);
+                        self.running = false;
+                    }
                 }
-                Status::Exited(code) => {
-                    println!("Inferior exited: {}", code);
-                }
-                Status::Signaled(sign) => {
-                    println!("Inferior signaled: {}", sign);
+                Err(err) => {
+                    println!("Error continuing inferior: {}", err)
                 }
             }
-            Err(err) => {
-                println!("Error continuing inferior: {}", err)
+        } else {
+            println!("No inferior running!");
+        }
+    }
+
+    fn try_kill_inferior(&mut self) {
+        if self.running {
+            let inferior = self.inferior.as_mut().unwrap();
+            match inferior.kill() {
+                Ok(_) => {
+                    println!("Old inferior killed!");
+                    self.running = false;
+                }
+                Err(err) => {
+                    println!("Error killing inferior: {}", err)
+                }
             }
         }
     }

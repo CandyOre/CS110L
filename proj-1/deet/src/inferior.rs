@@ -68,8 +68,13 @@ impl Inferior {
         })
     }
 
-    pub fn cont(&self) ->Result<Status, nix::Error> {
+    pub fn cont(&self) -> Result<Status, nix::Error> {
         ptrace::cont(self.pid(), None)?;
+        self.wait(None)
+    }
+
+    pub fn kill(&mut self) -> Result<Status, nix::Error> {
+        self.child.kill().expect("Error killing inferior");
         self.wait(None)
     }
 }
