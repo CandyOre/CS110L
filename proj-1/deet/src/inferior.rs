@@ -94,4 +94,9 @@ impl Inferior {
         self.child.kill().expect("Error killing inferior");
         self.wait(None)
     }
+
+    pub fn print_backtrace(&self) -> Result<(), nix::Error> {
+        println!("Hi backtrace");
+        Ok(())
+    }
 }

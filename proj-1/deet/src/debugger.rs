@@ -60,6 +60,9 @@ impl Debugger {
                         println!("No subprocess running");
                     }
                 }
+                DebuggerCommand::Backtrace => {
+                    self.print_inferior_backtrace();
+                }
             }
         }
     }
@@ -100,6 +103,20 @@ impl Debugger {
             }
         }
         self.inferior = None;
+    }
+
+    fn print_inferior_backtrace(&self) {
+        if self.running {
+            let inferior = self.inferior.as_ref().unwrap();
+            match inferior.print_backtrace() {
+                Ok(_) => (),
+                Err(err) => {
+                    println!("Error printing backtrace: {}", err);
+                }
+            }
+        } else {
+            println!("No subprocess running");
+        }
     }
 
     /// This function prompts the user to enter a command, and continues re-prompting until the user
