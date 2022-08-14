@@ -103,24 +103,32 @@ impl Inferior {
         let mut rip = regs.rip as usize;
         let mut rbp = regs.rbp as usize;
         loop {
-            let line = data.get_line_from_addr(rip);
-            let func = data.get_function_from_addr(rip);
-            match (&line, &func) {
-                (Some(line), Some(func)) => {
-                    let re = Regex::new(r"(.*deet/)").unwrap();
-                    let line = line.to_string();
-                    let line = re.replace_all(&line, "/deet/").to_string();
-
-                    println!("{} ({})", func, line);
-                    if func == "main" {
-                        break;
-                    }
-                }
-                (_, _) => break,
+            let func = self.try_print_position(data, Some(rip))?;
+            if func.unwrap_or("".to_string()) == "main" {
+                break;
             }
             rip = ptrace::read(self.pid(), (rbp + 8) as ptrace::AddressType)? as usize;
             rbp = ptrace::read(self.pid(), rbp as ptrace::AddressType)? as usize;
         }
         Ok(())
+    }
+
+    pub fn try_print_position(&self, data: &DwarfData, rip: Option<usize>)
+            -> Result<Option<String>, nix::Error> {
+        let regs = ptrace::getregs(self.pid())?;
+        let rip = rip.unwrap_or(regs.rip as usize);
+        let line = data.get_line_from_addr(rip);
+        let func = data.get_function_from_addr(rip);
+        match (line, func) {
+            (Some(line), Some(func)) => {
+                let re = Regex::new(r"(.*deet/)").unwrap();
+                let line = line.to_string();
+                let line = re.replace_all(&line, "/deet/").to_string();
+
+                println!("{} ({})", func, line);
+                Ok(Some(func))
+            }
+            (_, _) => Ok(None),
+        }
     }
 }
