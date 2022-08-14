@@ -74,11 +74,8 @@ impl Inferior {
         }
         let mut inferior = Inferior {child};
         inferior.wait(None).ok()?;
-        for bp in breakpoints.clone().values() {
-            match inferior.write_byte(bp.addr, 0xcc) {
-                Ok(inst) => breakpoints.get_mut(&bp.addr).unwrap().inst = inst,
-                Err(_) => println!("Invalid breapoint {:#x}", bp.addr),
-            }
+        for (_, bp) in breakpoints.iter_mut() {
+            inferior.add_breakpoint(bp);
         }
         Some(inferior)
     }
@@ -96,6 +93,19 @@ impl Inferior {
             updated_word as *mut std::ffi::c_void,
         )?;
         Ok(orig_byte as u8)
+    }
+
+    pub fn add_breakpoint(&mut self, bp: &mut Breakpoint) -> bool {
+        match self.write_byte(bp.addr, 0xcc) {
+            Ok(inst) => {
+                bp.inst = inst;
+                true
+            }
+            Err(_) => {
+                println!("Invalid breakpoint {:#x}", bp.addr);
+                false
+            }
+        }
     }
 
     /// Returns the pid of this inferior.

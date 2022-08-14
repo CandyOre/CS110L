@@ -88,13 +88,10 @@ impl Debugger {
                     self.print_inferior_backtrace();
                 }
                 DebuggerCommand::Breakpoint(location) => {
-                    if let Some(bp) = self.parse_location(&location) {
-                        self.breakpoints.insert(bp, Breakpoint {addr: bp, inst: 0});
-                        println!("Set breakpoint {} at {:#x}",
-                            self.breakpoints.len() - 1,
-                            self.breakpoints.get(&bp).unwrap().addr);
+                    if let Some(addr) = self.parse_location(&location) {
+                        self.try_add_breakpoint(addr);
                     } else {
-                        println!("Invalid break location!");
+                        println!("Invalid break location format!");
                     }
                 }
             }
@@ -168,6 +165,16 @@ impl Debugger {
             usize::from_str_radix(loc, 16).ok()
         } else {
             None
+        }
+    }
+
+    fn try_add_breakpoint(&mut self, addr: usize) {
+        let mut bp = Breakpoint {addr: addr, inst: 0};
+        if !self.running || self.inferior.as_mut().unwrap().add_breakpoint(&mut bp) {
+            self.breakpoints.insert(addr, bp);
+            println!("Set breakpoint {} at {:#x}",
+                self.breakpoints.len() - 1,
+                self.breakpoints.get(&addr).unwrap().addr);
         }
     }
 
