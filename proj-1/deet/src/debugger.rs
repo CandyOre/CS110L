@@ -163,8 +163,16 @@ impl Debugger {
                 &loc[1..]
             };
             usize::from_str_radix(loc, 16).ok()
-        } else {
-            None
+        }
+        else {
+            match usize::from_str_radix(loc, 10) {
+                Ok(line) => {
+                    self.debug_data.get_addr_for_line(None, line)
+                }
+                Err(_) => {
+                    self.debug_data.get_addr_for_function(None, loc)
+                }
+            }
         }
     }
 
