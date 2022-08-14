@@ -40,3 +40,4 @@ To achieve these goals, I hope to complete the course in 1 week.
 |0805   |07-08      |           |           |1.5h   |
 |0806-12|           |           |           |fishing|
 |0813   |           |           |proj1.01-03|3h     |
+|0814   |           |           |proj1.04-07|3h     |
