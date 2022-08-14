@@ -8,6 +8,7 @@ use std::os::unix::process::CommandExt;
 use std::process::Child;
 use std::process::Command;
 use std::fmt;
+use std::mem::size_of;
 use regex::Regex;
 
 pub enum Status {
@@ -48,6 +49,10 @@ fn child_traceme() -> Result<(), std::io::Error> {
     )))
 }
 
+fn align_addr_to_word(addr: usize) -> usize {
+    addr & (-(size_of::<usize>() as isize) as usize)
+}
+
 pub struct Inferior {
     child: Child,
 }
@@ -55,7 +60,7 @@ pub struct Inferior {
 impl Inferior {
     /// Attempts to start a new inferior process. Returns Some(Inferior) if successful, or None if
     /// an error is encountered.
-    pub fn new(target: &str, args: &Vec<String>) -> Option<Inferior> {
+    pub fn new(target: &str, args: &Vec<String>, breakpoints: &Vec<usize>) -> Option<Inferior> {
         let child;
         unsafe {
             child = Command::new(target)
@@ -64,9 +69,28 @@ impl Inferior {
                 .spawn()
                 .ok()?;
         }
-        let inferior = Inferior {child};
+        let mut inferior = Inferior {child};
         inferior.wait(None).ok()?;
+        for bp in breakpoints {
+            inferior.write_byte(bp.clone(), 0xcc)
+                    .expect("Invalid breakpoints found while creating subprocess!");
+        }
         Some(inferior)
+    }
+
+    fn write_byte(&mut self, addr: usize, val: u8) -> Result<u8, nix::Error> {
+        let aligned_addr = align_addr_to_word(addr);
+        let byte_offset = addr - aligned_addr;
+        let word = ptrace::read(self.pid(), aligned_addr as ptrace::AddressType)? as u64;
+        let orig_byte = (word >> 8 * byte_offset) & 0xff;
+        let masked_word = word & !(0xff << 8 * byte_offset);
+        let updated_word = masked_word | ((val as u64) << 8 * byte_offset);
+        ptrace::write(
+            self.pid(),
+            aligned_addr as ptrace::AddressType,
+            updated_word as *mut std::ffi::c_void,
+        )?;
+        Ok(orig_byte as u8)
     }
 
     /// Returns the pid of this inferior.
