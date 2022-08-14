@@ -54,7 +54,7 @@ impl Debugger {
                             = Inferior::new(&self.target, &args, &self.breakpoints) {
                         // Kill old inferior
                         self.try_kill_inferior();
-                        // Create the inferior
+                        // Bind the inferior
                         self.inferior = Some(inferior);
                         self.running = true;
                         // Run the inferior
@@ -81,13 +81,14 @@ impl Debugger {
                     self.print_inferior_backtrace();
                 }
                 DebuggerCommand::Breakpoint(location) => {
-                    let bp = self.parse_location(&location)
-                        .expect("Invalid break location!");
-
-                    self.breakpoints.push(bp);
-                    println!("Set breakpoint {} at {:#x}",
-                        self.breakpoints.len() - 1,
-                        self.breakpoints.last().unwrap());
+                    if let Some(bp) = self.parse_location(&location) {
+                        self.breakpoints.push(bp);
+                        println!("Set breakpoint {} at {:#x}",
+                            self.breakpoints.len() - 1,
+                            self.breakpoints.last().unwrap());
+                    } else {
+                        println!("Invalid break location!");
+                    }
                 }
             }
         }
