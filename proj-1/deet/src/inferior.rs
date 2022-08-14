@@ -117,9 +117,35 @@ impl Inferior {
         })
     }
 
-    pub fn cont(&self) -> Result<Status, nix::Error> {
+    pub fn cont(&mut self, breakpoints: &HashMap<usize, Breakpoint>) -> Result<Status, nix::Error> {
+        let regs = ptrace::getregs(self.pid())?;
+        let rip = regs.rip as usize;
+        if breakpoints.contains_key(&rip) {
+            ptrace::step(self.pid(), None)?;
+            match self.wait(None)? {
+                Status::Stopped(sign, ip) => {
+                    if sign != signal::SIGTRAP {
+                        return Ok(Status::Stopped(sign, ip));
+                    }
+                }
+                Status::Exited(code) => return Ok(Status::Exited(code)),
+                Status::Signaled(sign) => return Ok(Status::Signaled(sign)),
+            }
+            self.write_byte(rip, 0xcc)?;
+        }
+
         ptrace::cont(self.pid(), None)?;
-        self.wait(None)
+        let status = self.wait(None);
+
+        let mut regs = ptrace::getregs(self.pid())?;
+        let rip = (regs.rip - 1) as usize;
+        if breakpoints.contains_key(&rip) {
+            self.write_byte(rip, breakpoints.get(&rip).unwrap().inst)?;
+            regs.rip -= 1;
+            ptrace::setregs(self.pid(), regs)?;
+        }
+
+        status
     }
 
     pub fn kill(&mut self) -> Result<Status, nix::Error> {

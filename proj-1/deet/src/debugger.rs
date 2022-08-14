@@ -104,7 +104,7 @@ impl Debugger {
     fn cont_inferior(&mut self) {
         if self.running {
             let inferior = self.inferior.as_mut().unwrap();
-            match inferior.cont() {
+            match inferior.cont(&self.breakpoints) {
                 Ok(status) => {
                     println!("{}", status);
                     match status {
