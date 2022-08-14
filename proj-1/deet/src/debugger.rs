@@ -89,7 +89,11 @@ impl Debugger {
                     match status {
                         InferiorStatus::Exited(_) |
                         InferiorStatus::Signaled(_) => self.running = false,
-                        _ => (),
+                        InferiorStatus::Stopped(_, ip) => {
+                            print!("Stopped at ");
+                            inferior.try_print_position(&self.debug_data, Some(ip))
+                                    .expect("Error printing stopped location");
+                        }
                     }
                 }
                 Err(err) => {
