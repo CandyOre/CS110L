@@ -91,7 +91,7 @@ impl Debugger {
                         InferiorStatus::Signaled(_) => self.running = false,
                         InferiorStatus::Stopped(_, ip) => {
                             print!("Stopped at ");
-                            inferior.try_print_position(&self.debug_data, Some(ip))
+                            inferior.try_print_location(&self.debug_data, Some(ip))
                                     .expect("Error printing stopped location");
                         }
                     }

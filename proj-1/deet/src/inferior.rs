@@ -103,7 +103,7 @@ impl Inferior {
         let mut rip = regs.rip as usize;
         let mut rbp = regs.rbp as usize;
         loop {
-            let func = self.try_print_position(data, Some(rip))?;
+            let func = self.try_print_location(data, Some(rip))?;
             if func.unwrap_or("".to_string()) == "main" {
                 break;
             }
@@ -113,7 +113,7 @@ impl Inferior {
         Ok(())
     }
 
-    pub fn try_print_position(&self, data: &DwarfData, rip: Option<usize>)
+    pub fn try_print_location(&self, data: &DwarfData, rip: Option<usize>)
             -> Result<Option<String>, nix::Error> {
         let regs = ptrace::getregs(self.pid())?;
         let rip = rip.unwrap_or(regs.rip as usize);
