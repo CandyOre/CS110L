@@ -4,6 +4,7 @@ pub enum DebuggerCommand {
     Continue,
     Kill,
     Backtrace,
+    Breakpoint(String),
 }
 
 impl DebuggerCommand {
@@ -19,6 +20,10 @@ impl DebuggerCommand {
             "c" | "cont" | "continue" => Some(DebuggerCommand::Continue),
             "k" | "kill" => Some(DebuggerCommand::Kill),
             "bt" | "back" | "backtrace" => Some(DebuggerCommand::Backtrace),
+            "b" | "break" => {
+                let location = tokens[1];
+                Some(DebuggerCommand::Breakpoint(location.to_string()))
+            }
             // Default case:
             _ => None,
         }

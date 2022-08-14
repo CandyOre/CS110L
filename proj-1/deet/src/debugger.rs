@@ -9,6 +9,7 @@ pub struct Debugger {
     debug_data: DwarfData,
     history_path: String,
     readline: Editor<()>,
+    breakpoints: Vec<usize>,
     inferior: Option<Inferior>,
     running: bool,
 }
@@ -38,6 +39,7 @@ impl Debugger {
             debug_data,
             history_path,
             readline,
+            breakpoints: Vec::new(),
             inferior: None,
             running: false,
         }
@@ -75,6 +77,17 @@ impl Debugger {
                 }
                 DebuggerCommand::Backtrace => {
                     self.print_inferior_backtrace();
+                }
+                DebuggerCommand::Breakpoint(location) => {
+                    let bp = self.parse_location(&location)
+                        .expect("Invalid break location!");
+
+                    self.breakpoints.push(bp);
+                    println!("Set breakpoint {} at {:#x}",
+                        self.breakpoints.len() - 1,
+                        self.breakpoints.last().unwrap());
+                    
+                    
                 }
             }
         }
@@ -133,6 +146,20 @@ impl Debugger {
             }
         } else {
             println!("No subprocess running");
+        }
+    }
+
+    fn parse_location(&self, loc: &str) -> Option<usize> {
+        if loc.starts_with("*") {
+            let loc = if loc.to_lowercase().starts_with("*0x") {
+                &loc[3..]
+            }
+            else {
+                &loc[1..]
+            };
+            usize::from_str_radix(loc, 16).ok()
+        } else {
+            None
         }
     }
 
