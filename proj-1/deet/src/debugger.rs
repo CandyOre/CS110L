@@ -3,15 +3,22 @@ use crate::inferior::{Inferior, Status as InferiorStatus};
 use crate::dwarf_data::{DwarfData, Error as DwarfError};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+use std::collections::HashMap;
 
 pub struct Debugger {
     target: String,
     debug_data: DwarfData,
     history_path: String,
     readline: Editor<()>,
-    breakpoints: Vec<usize>,
+    breakpoints: HashMap<usize, Breakpoint>,
     inferior: Option<Inferior>,
     running: bool,
+}
+
+#[derive(Clone)]
+pub struct Breakpoint {
+    pub addr: usize,
+    pub inst: u8,
 }
 
 impl Debugger {
@@ -40,7 +47,7 @@ impl Debugger {
             debug_data,
             history_path,
             readline,
-            breakpoints: Vec::new(),
+            breakpoints: HashMap::new(),
             inferior: None,
             running: false,
         }
@@ -51,7 +58,7 @@ impl Debugger {
             match self.get_next_command() {
                 DebuggerCommand::Run(args) => {
                     if let Some(inferior)
-                            = Inferior::new(&self.target, &args, &self.breakpoints) {
+                            = Inferior::new(&self.target, &args, &mut self.breakpoints) {
                         // Kill old inferior
                         self.try_kill_inferior();
                         // Bind the inferior
@@ -82,10 +89,10 @@ impl Debugger {
                 }
                 DebuggerCommand::Breakpoint(location) => {
                     if let Some(bp) = self.parse_location(&location) {
-                        self.breakpoints.push(bp);
+                        self.breakpoints.insert(bp, Breakpoint {addr: bp, inst: 0});
                         println!("Set breakpoint {} at {:#x}",
                             self.breakpoints.len() - 1,
-                            self.breakpoints.last().unwrap());
+                            self.breakpoints.get(&bp).unwrap().addr);
                     } else {
                         println!("Invalid break location!");
                     }

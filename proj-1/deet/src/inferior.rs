@@ -1,5 +1,6 @@
 
 use crate::dwarf_data::DwarfData;
+use crate::debugger::Breakpoint;
 use nix::sys::ptrace;
 use nix::sys::signal;
 use nix::sys::wait::{waitpid, WaitPidFlag, WaitStatus};
@@ -9,6 +10,7 @@ use std::process::Child;
 use std::process::Command;
 use std::fmt;
 use std::mem::size_of;
+use std::collections::HashMap;
 use regex::Regex;
 
 pub enum Status {
@@ -60,7 +62,8 @@ pub struct Inferior {
 impl Inferior {
     /// Attempts to start a new inferior process. Returns Some(Inferior) if successful, or None if
     /// an error is encountered.
-    pub fn new(target: &str, args: &Vec<String>, breakpoints: &Vec<usize>) -> Option<Inferior> {
+    pub fn new(target: &str, args: &Vec<String>, breakpoints: &mut HashMap<usize, Breakpoint>)
+            -> Option<Inferior> {
         let child;
         unsafe {
             child = Command::new(target)
@@ -71,9 +74,11 @@ impl Inferior {
         }
         let mut inferior = Inferior {child};
         inferior.wait(None).ok()?;
-        for bp in breakpoints {
-            inferior.write_byte(bp.clone(), 0xcc)
-                    .expect("Invalid breakpoints found while creating subprocess!");
+        for bp in breakpoints.clone().values() {
+            match inferior.write_byte(bp.addr, 0xcc) {
+                Ok(inst) => breakpoints.get_mut(&bp.addr).unwrap().inst = inst,
+                Err(_) => println!("Invalid breapoint {:#x}", bp.addr),
+            }
         }
         Some(inferior)
     }
