@@ -19,7 +19,7 @@ where
         let output_sender = output_sender.clone();
         threads.push(thread::spawn(move || {
             while let Ok((id, val)) = input_receiver.recv() {
-                output_sender.send((id, f(val))).expect("");
+                output_sender.send((id, f(val))).expect("Missing output receiver!");
             }
             drop(output_sender);
         }))
@@ -27,7 +27,7 @@ where
     drop(output_sender);
 
     while let Some(val) = input_vec.pop() {
-        input_sender.send((input_vec.len(), val)).expect("");
+        input_sender.send((input_vec.len(), val)).expect("Missing input receiver!");
     }
     drop(input_sender);
 
@@ -36,7 +36,7 @@ where
     }
 
     for thread in threads {
-        thread.join().expect("");
+        thread.join().expect("Thread panic!");
     }
 
     output_vec
