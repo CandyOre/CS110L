@@ -29,7 +29,7 @@ I have learned the basics of Rust with [Too Many Linked List](https://rust-unoff
 1. Review Rust to gain a deeper understanding.
 2. Focus on concurrency in the latter part of the course.
 
-To achieve these goals, I hope to complete the course in 1 week.
+To achieve these goals, I hope to complete the course in ~~1 week~~(You know, it's always good to have a plan xD.)
 
 |Date   |Lecture    |Excercise  |Project    |Time   |
 |:-:    |:-:        |:-:        |:-:        |:-:    |
@@ -45,3 +45,4 @@ To achieve these goals, I hope to complete the course in 1 week.
 |0822   |           |05         |           |0.5h   |
 |0823   |13         |           |           |1h     |
 |0824   |14         |           |           |1h     |
+|0825   |15-16      |06         |proj2.01-02|2h     |
