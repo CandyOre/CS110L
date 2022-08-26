@@ -115,14 +115,20 @@ async fn get_random_upstream(state: &ProxyState) -> Option<(usize, String)> {
     }
 }
 
+async fn delete_upstream(state: &ProxyState, idx: usize) {
+    let mut upstream_ref = state.upstream_addresses.write().await;
+    if idx < upstream_ref.len() {
+        upstream_ref.swap_remove(idx);
+    }
+}
+
 async fn connect_to_upstream(state: &ProxyState) -> Result<TcpStream, std::io::Error> {
     loop {
         if let Some((idx, ip)) = get_random_upstream(state).await {
             match TcpStream::connect(ip).await {
                 Ok(stream) => return Ok(stream),
                 Err(_) => {
-                    let mut upstream_ref = state.upstream_addresses.write().await;
-                    upstream_ref.swap_remove(idx);
+                    delete_upstream(state, idx).await;
                 }
             }
         } else {
