@@ -4,9 +4,11 @@ mod response;
 use clap::Parser;
 use rand::{Rng, SeedableRng};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::stream::StreamExt;
+// use tokio::stream::StreamExt;
 use tokio::sync::RwLock;
 use std::sync::Arc;
+use std::time::Duration;
+use futures::stream::{self, StreamExt};
 
 /// Contains information parsed from the command-line invocation of balancebeam. The Clap macros
 /// provide a fancy way to automatically construct a command-line argument parser.
@@ -95,6 +97,11 @@ async fn main() {
         max_requests_per_minute: options.max_requests_per_minute,
     });
 
+    let state_ref = state.clone();
+    tokio::spawn(async move {
+        active_health_check(&state_ref).await;
+    });
+
     while let Some(Ok(stream)) = listener.next().await {
         let state_ref = state.clone();
         tokio::spawn(async move {
@@ -119,6 +126,51 @@ async fn delete_upstream(state: &ProxyState, idx: usize) {
     let mut upstream_ref = state.upstream_addresses.write().await;
     if idx < upstream_ref.len() {
         upstream_ref.swap_remove(idx);
+    }
+}
+
+async fn is_alive(state: &ProxyState, ip: &String) -> Option<()> {
+    let request = http::Request::builder()
+        .method(http::Method::GET)
+        .uri(&state.active_health_check_path)
+        .header("Host", ip)
+        .body(Vec::new())
+        .unwrap();
+    let mut stream = TcpStream::connect(ip).await.ok()?;
+
+    request::write_to_stream(&request, &mut stream).await.ok()?;
+    if response::read_from_stream(&mut stream, &http::Method::GET)
+        .await
+        .ok()?
+        .status() == http::StatusCode::OK {
+            Some(())
+    } else {
+        None
+    }
+}
+
+async fn filter_alive(state: &ProxyState)
+{
+    let mut upstream = state.upstream_addresses.write().await;
+    log::debug!("Health Check Start with {} alive!", upstream.len());
+    *upstream = stream::iter(std::mem::take(&mut *upstream))
+        .filter_map(|ip| async {
+            if let Some(_) = is_alive(state, &ip).await {
+                Some(ip)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>()
+        .await;
+    log::debug!("Health Check Complete with {} alive!", upstream.len());
+}
+
+async fn active_health_check(state: &ProxyState) {
+    let duration = Duration::from_secs(state.active_health_check_interval as u64);
+    loop {
+        tokio::time::delay_for(duration).await;
+        filter_alive(state).await;
     }
 }
 
