@@ -9,9 +9,9 @@ Stanford CS110L is a course about Rust Language and Systems Programming. Rust is
 2. Ownership and Borrow
 3. Error handling with "Option" & "Result"
 4. Traits & Generics for Abstraction
-5. Rc(Reference Counter) & RefCell
+5. Smart Pointers, e.g. Box / Rc / Arc / RefCells
 6. Macros & Code Generation
-7. Apply Rust Concept to C/C++ Program
+7. Apply Rust Concepts to C / C++, e.g. RAII, Ownership etc.
 
 #### Concurrency
 1. Multiprocessing vs Multithreading
@@ -46,7 +46,7 @@ Relative course:
 
 - [CS242 Programming Language(Newest)](https://web.stanford.edu/class/cs242/) or [Fall 2019](https://stanford-cs242.github.io/f19/)
 
-## Progress
+## Progress (Finished)
 
 I have learned the basics of Rust with [Too Many Linked List](https://rust-unofficial.github.io/too-many-lists/). In this course, I want to achieve two goals.
 
@@ -73,3 +73,4 @@ To achieve these goals, I hope to complete the course in ~~1 week~~(You know, it
 |0826   |           |           |proj2.03   |2h     |
 |0827   |           |           |proj2.04-05|3h     |
 |0828   |17-18      |           |           |1h     |
+|Total  |           |           |           |32.5h  |
