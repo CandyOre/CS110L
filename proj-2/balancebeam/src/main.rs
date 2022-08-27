@@ -60,6 +60,8 @@ struct ProxyState {
     max_requests_per_minute: usize,
     /// Addresses of servers that we are proxying to
     upstream_addresses: RwLock<Vec<String>>,
+    /// Addresses of servers that are currently dead
+    dead_addresses: RwLock<Vec<String>>,
 }
 
 #[tokio::main]
@@ -92,6 +94,7 @@ async fn main() {
     // Handle incoming connections
     let state = Arc::new(ProxyState {
         upstream_addresses: RwLock::new(options.upstream),
+        dead_addresses: RwLock::new(Vec::new()),
         active_health_check_interval: options.active_health_check_interval,
         active_health_check_path: options.active_health_check_path,
         max_requests_per_minute: options.max_requests_per_minute,
@@ -124,7 +127,9 @@ async fn get_random_upstream(state: &ProxyState) -> Option<(usize, String)> {
 
 async fn delete_upstream(state: &ProxyState, idx: usize) {
     let mut upstream_ref = state.upstream_addresses.write().await;
+    let mut dead_ref = state.dead_addresses.write().await;
     if idx < upstream_ref.len() {
+        dead_ref.push(std::mem::take(&mut upstream_ref[idx]));
         upstream_ref.swap_remove(idx);
     }
 }
@@ -152,7 +157,11 @@ async fn is_alive(state: &ProxyState, ip: &String) -> Option<()> {
 async fn filter_alive(state: &ProxyState)
 {
     let mut upstream = state.upstream_addresses.write().await;
+    let mut dead = state.dead_addresses.write().await;
+    upstream.append(&mut *dead);
+
     log::debug!("Health Check Start with {} alive!", upstream.len());
+    *dead = upstream.clone().into_iter().collect();
     *upstream = stream::iter(std::mem::take(&mut *upstream))
         .filter_map(|ip| async {
             if let Some(_) = is_alive(state, &ip).await {
@@ -163,6 +172,10 @@ async fn filter_alive(state: &ProxyState)
         })
         .collect::<Vec<_>>()
         .await;
+    *dead = std::mem::take(&mut *dead)
+        .into_iter()
+        .filter(|ip| !upstream.contains(ip))
+        .collect();
     log::debug!("Health Check Complete with {} alive!", upstream.len());
 }
 
