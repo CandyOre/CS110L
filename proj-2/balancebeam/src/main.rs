@@ -5,10 +5,10 @@ use clap::Parser;
 use rand::{Rng, SeedableRng};
 use tokio::net::{TcpListener, TcpStream};
 // use tokio::stream::StreamExt;
-use tokio::sync::RwLock;
+use tokio::sync::{RwLock, Mutex};
 use std::sync::Arc;
 use std::time::Duration;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use futures::stream::{self, StreamExt};
 
 /// Contains information parsed from the command-line invocation of balancebeam. The Clap macros
@@ -63,6 +63,8 @@ struct ProxyState {
     upstream_addresses: RwLock<Vec<String>>,
     /// Addresses of servers that are currently dead
     dead_addresses: RwLock<Vec<String>>,
+    /// Requests per minutes
+    requests_counter: Mutex<HashMap<String, usize>>,
 }
 
 #[tokio::main]
@@ -98,6 +100,7 @@ async fn main() {
         dead_addresses: RwLock::new(Vec::new()),
         active_health_check_interval: options.active_health_check_interval,
         active_health_check_path: options.active_health_check_path,
+        requests_counter: Mutex::new(HashMap::new()),
         max_requests_per_minute: options.max_requests_per_minute,
     });
 
@@ -106,11 +109,26 @@ async fn main() {
         active_health_check(&state_ref).await;
     });
 
+    if options.max_requests_per_minute > 0 {
+        let state_ref = state.clone();
+        tokio::spawn(async move {
+            requests_counter_timer(&state_ref, Duration::from_secs(60)).await;
+        });
+    }
+
     while let Some(Ok(stream)) = listener.next().await {
         let state_ref = state.clone();
         tokio::spawn(async move {
             handle_connection(stream, &state_ref).await;
         });
+    }
+}
+
+async fn requests_counter_timer(state: &ProxyState, duration: Duration) {
+    loop {
+        tokio::time::delay_for(duration).await;
+        state.requests_counter.lock().await.clear();
+        log::debug!("Request counter reset!");
     }
 }
 
@@ -268,6 +286,19 @@ async fn handle_connection(mut client_conn: TcpStream, state: &ProxyState) {
             upstream_ip,
             request::format_request_line(&request)
         );
+
+        if state.max_requests_per_minute > 0 {
+            log::debug!("Check requests limit!");
+            let mut counter = state.requests_counter.lock().await;
+            let count = counter.entry(client_ip.clone()).or_insert(0);
+            *count += 1;
+            if *count > state.max_requests_per_minute {
+                let response = response::make_http_error(http::StatusCode::TOO_MANY_REQUESTS);
+                send_response(&mut client_conn, &response).await;
+                // response::write_to_stream(&response, &mut client_conn).await.unwrap();
+                return;
+            }
+        }
 
         // Add X-Forwarded-For header so that the upstream server knows the client's IP address.
         // (We're the ones connecting directly to the upstream server, so without this header, the
