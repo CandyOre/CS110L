@@ -10,7 +10,8 @@ Stanford CS110L is a course about Rust Language and Systems Programming. Rust is
 3. Error handling with "Option" & "Result"
 4. Traits & Generics for Abstraction
 5. Rc(Reference Counter) & RefCell
-6. Macros
+6. Macros & Code Generation
+7. Apply Rust Concept to C/C++ Program
 
 #### Concurrency
 1. Multiprocessing vs Multithreading
