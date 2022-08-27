@@ -4,7 +4,6 @@ mod response;
 use clap::Parser;
 use rand::{Rng, SeedableRng};
 use tokio::net::{TcpListener, TcpStream};
-// use tokio::stream::StreamExt;
 use tokio::sync::{RwLock, Mutex};
 use std::sync::Arc;
 use std::time::Duration;
@@ -51,13 +50,10 @@ struct CmdOptions {
 /// You should add fields to this struct in later milestones.
 struct ProxyState {
     /// How frequently we check whether upstream servers are alive (Milestone 4)
-    #[allow(dead_code)]
     active_health_check_interval: usize,
     /// Where we should send requests when doing active health checks (Milestone 4)
-    #[allow(dead_code)]
     active_health_check_path: String,
     /// Maximum number of requests an individual IP can make in a minute (Milestone 5)
-    #[allow(dead_code)]
     max_requests_per_minute: usize,
     /// Addresses of servers that we are proxying to
     upstream_addresses: RwLock<Vec<String>>,
@@ -173,8 +169,7 @@ async fn is_alive(state: &ProxyState, ip: &String) -> Option<()> {
     }
 }
 
-async fn filter_alive(state: &ProxyState)
-{
+async fn filter_alive(state: &ProxyState) {
     let mut upstream = state.upstream_addresses.write().await;
     let mut dead = state.dead_addresses.write().await;
     upstream.append(&mut *dead);
