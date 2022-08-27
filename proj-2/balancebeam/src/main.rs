@@ -114,11 +114,11 @@ async fn main() {
 }
 
 async fn get_random_upstream(state: &ProxyState) -> Option<(usize, String)> {
-    let upstream_ref = state.upstream_addresses.read().await;
-    if upstream_ref.len() > 0 {
+    let upstream = state.upstream_addresses.read().await;
+    if upstream.len() > 0 {
         let mut rng = rand::rngs::StdRng::from_entropy();
-        let upstream_idx = rng.gen_range(0, upstream_ref.len());
-        let upstream_ip = &upstream_ref[upstream_idx];
+        let upstream_idx = rng.gen_range(0, upstream.len());
+        let upstream_ip = &upstream[upstream_idx];
         Some((upstream_idx, upstream_ip.to_string()))
     } else {
         None
@@ -126,11 +126,11 @@ async fn get_random_upstream(state: &ProxyState) -> Option<(usize, String)> {
 }
 
 async fn delete_upstream(state: &ProxyState, idx: usize) {
-    let mut upstream_ref = state.upstream_addresses.write().await;
-    let mut dead_ref = state.dead_addresses.write().await;
-    if idx < upstream_ref.len() {
-        dead_ref.push(std::mem::take(&mut upstream_ref[idx]));
-        upstream_ref.swap_remove(idx);
+    let mut upstream = state.upstream_addresses.write().await;
+    let mut dead = state.dead_addresses.write().await;
+    if idx < upstream.len() {
+        dead.push(std::mem::take(&mut upstream[idx]));
+        upstream.swap_remove(idx);
     }
 }
 
