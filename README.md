@@ -70,4 +70,5 @@ To achieve these goals, I hope to complete the course in ~~1 week~~(You know, it
 |0824   |14         |           |           |1h     |
 |0825   |15-16      |06         |proj2.01-02|2h     |
 |0826   |           |           |proj2.03   |2h     |
-|0826   |           |           |proj2.04-05|3h     |
+|0827   |           |           |proj2.04-05|3h     |
+|0828   |17-18      |           |           |1h     |
