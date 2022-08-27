@@ -8,6 +8,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::RwLock;
 use std::sync::Arc;
 use std::time::Duration;
+use std::collections::HashSet;
 use futures::stream::{self, StreamExt};
 
 /// Contains information parsed from the command-line invocation of balancebeam. The Clap macros
@@ -172,11 +173,13 @@ async fn filter_alive(state: &ProxyState)
         })
         .collect::<Vec<_>>()
         .await;
+
+    let alive: HashSet<String> = upstream.clone().into_iter().collect();
     *dead = std::mem::take(&mut *dead)
         .into_iter()
-        .filter(|ip| !upstream.contains(ip))
+        .filter(|ip| !alive.contains(ip))
         .collect();
-    log::debug!("Health Check Complete with {} alive!", upstream.len());
+    log::debug!("Health Check Complete with {} alive!", alive.len());
 }
 
 async fn active_health_check(state: &ProxyState) {
