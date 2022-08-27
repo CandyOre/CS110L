@@ -1,10 +1,33 @@
 # CS110L: Safety in Systems Programming
 
-# Description
+## Description
 
-Stanford CS110L is a course about Rust Language and Systems Programming. [<u>TODO</u>] There will be a list of "what I learned" when I finished the course.
+Stanford CS110L is a course about Rust Language and Systems Programming. There is a list of "what I learned" for your reference.
 
-# Resources
+#### Rust Basics
+1. Memory Safety
+2. Ownership and Borrow
+3. Error handling with "Option" & "Result"
+4. Traits & Generics for Abstraction
+5. Rc(Reference Counter) & RefCell
+6. Macros
+
+#### Concurrency
+1. Multiprocessing vs Multithreading
+    - Examples: Google Chrome vs Firefox Explorer
+2. Synchronization Methods in Multithreading
+    - Mutex
+    - Conditional Variable
+    - Channel
+3. Basics of Distributed System
+    - Scalability
+    - Availability
+    - Security
+4. Asynchronous Programming
+    - Future
+    - Async / Await
+
+## Resources
 
 Most resources of this course are incomplete. I'll mainly focus on the Spring 2020 version, which is relatively aggregated. I also notice the content of this course is gradually decreasing across the years, thus maybe the course in 2022 is mostly refined.
 
@@ -22,7 +45,7 @@ Relative course:
 
 - [CS242 Programming Language(Newest)](https://web.stanford.edu/class/cs242/) or [Fall 2019](https://stanford-cs242.github.io/f19/)
 
-# Progress
+## Progress
 
 I have learned the basics of Rust with [Too Many Linked List](https://rust-unofficial.github.io/too-many-lists/). In this course, I want to achieve two goals.
 
