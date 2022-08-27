@@ -2,7 +2,7 @@
 
 ## Description
 
-Stanford CS110L is a course about Rust Language and Systems Programming. There is a list of "what I learned" for your reference.
+Stanford CS110L is a course about Rust Language and Systems Programming. Rust is quite elegant, and covers a lot of concepts in Programming Language. I highly recommand this course. There is a list of "what I learned" for your reference.
 
 #### Rust Basics
 1. Memory Safety
